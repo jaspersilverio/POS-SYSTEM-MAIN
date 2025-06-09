@@ -1,0 +1,43 @@
+/* Alert.css */
+
+
+.alert-green {
+    background-color: #018337;
+    
+    color: rgb(236, 235, 235);
+}
+.custom-alert {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1055;
+    min-width: 320px;
+    border-radius: 0.5rem;
+    transition: opacity 0.3s ease-in-out;
+    opacity: 0.95;
+    padding: 1rem 1.5rem;
+}
+
+.fade-in {
+    animation: slideInRight 0.3s ease forwards;
+}
+
+@keyframes slideInRight {
+    0% {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+
+    100% {
+        transform: translateX(0);
+        opacity: 0.95;
+    }
+}
+
+.mssg{
+    font-size: 1.2rem;
+    font-weight: 500;
+    color: #fff;
+    text-align: center;
+    margin: 0;
+}
