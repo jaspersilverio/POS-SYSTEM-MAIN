@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\RoleController;
 use App\Http\Controllers\Api\ProductController;
+use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -18,6 +19,13 @@ Route::controller(ProductController::class)->group(function () {
     Route::put('/updateProduct/{id}', 'updateProduct');
     Route::delete('/deleteProduct/{id}', 'deleteProduct');
 });
+
+// User routes
+Route::get('/users', [\App\Http\Controllers\UserController::class, 'index']);
+Route::post('/users', [\App\Http\Controllers\UserController::class, 'store']);
+Route::get('/users/{id}', [\App\Http\Controllers\UserController::class, 'show']);
+Route::put('/users/{id}', [\App\Http\Controllers\UserController::class, 'update']);
+Route::delete('/users/{id}', [\App\Http\Controllers\UserController::class, 'destroy']);
 
 // Route::get('/user', function (Request $request) {
 //     return $request->user();

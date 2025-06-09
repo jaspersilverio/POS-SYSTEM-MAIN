@@ -4,19 +4,20 @@ import ProductServices from "../../services/ProductServices";
 import ErrorHandler from "../../handler/ErrorHandler";
 import Spinner from "./Spinner";
 import EditProductModal from "../modals/EditProductModal";
+import { Table, Button, Modal } from "react-bootstrap";
 
 interface ProductsTableProps {
   refreshProducts: boolean;
   onProductDeleted: (message: string) => void;
-  onAddProduct: () => void;
 }
 
-const ProductsTable = ({ refreshProducts, onProductDeleted, onAddProduct }: ProductsTableProps) => {
+const ProductsTable = ({ refreshProducts, onProductDeleted }: ProductsTableProps) => {
   const [state, setState] = useState({
     loadingProducts: true,
     products: [] as Product[],
     showEditModal: false,
     selectedProduct: null as Product | null,
+    showDeleteModal: false,
   });
 
   const handleLoadProducts = () => {
@@ -68,17 +69,26 @@ const ProductsTable = ({ refreshProducts, onProductDeleted, onAddProduct }: Prod
   };
 
   const handleDeleteClick = (product: Product) => {
-    if (window.confirm('Are you sure you want to delete this product?')) {
-      ProductServices.deleteProduct(product.product_id)
-        .then((res) => {
-          if (res.status === 200) {
-            onProductDeleted(res.data.message);
-            handleLoadProducts();
-          }
-        })
-        .catch((error) => {
-          ErrorHandler(error, null);
-        });
+    setState((prev) => ({
+      ...prev,
+      selectedProduct: product,
+      showDeleteModal: true,
+    }));
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!state.selectedProduct) return;
+
+    try {
+      await ProductServices.deleteProduct(state.selectedProduct.product_id);
+      onProductDeleted("Product deleted successfully");
+      setState((prev) => ({
+        ...prev,
+        showDeleteModal: false,
+      }));
+      handleLoadProducts();
+    } catch (error) {
+      ErrorHandler(error, null);
     }
   };
 
@@ -86,18 +96,11 @@ const ProductsTable = ({ refreshProducts, onProductDeleted, onAddProduct }: Prod
     <div className="p-4">
       <div className="d-flex justify-content-between align-items-center mb-3">
         <h3>Products</h3>
-        <button
-          className="btn btn-danger"
-          data-bs-toggle="modal"
-          data-bs-target="#addProductModal"
-        >
-          Add Product
-        </button>
       </div>
 
-      <table className="table table-dark table-striped table-hover">
-        <thead className="align-middle">
-          <tr className="align-middle">
+      <Table striped bordered hover responsive>
+        <thead>
+          <tr>
             <th>ID</th>
             <th>Image</th>
             <th>Product Name</th>
@@ -166,7 +169,7 @@ const ProductsTable = ({ refreshProducts, onProductDeleted, onAddProduct }: Prod
             ))
           )}
         </tbody>
-      </table>
+      </Table>
 
       <EditProductModal
         show={state.showEditModal}
@@ -174,6 +177,23 @@ const ProductsTable = ({ refreshProducts, onProductDeleted, onAddProduct }: Prod
         onSave={handleEditSave}
         product={state.selectedProduct}
       />
+
+      <Modal show={state.showDeleteModal} onHide={() => setState((prev) => ({ ...prev, showDeleteModal: false }))} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Confirm Delete</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          Are you sure you want to delete the product "{state.selectedProduct?.product_name}"?
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setState((prev) => ({ ...prev, showDeleteModal: false }))} >
+            Cancel
+          </Button>
+          <Button variant="danger" onClick={handleDeleteConfirm}>
+            Delete
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 };
