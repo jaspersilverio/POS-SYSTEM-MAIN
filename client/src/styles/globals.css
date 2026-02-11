@@ -1,0 +1,5 @@
+/* Global styles: theme, dashboard, sidebar, alerts */
+@import "./theme.css";
+@import "./dashboard.css";
+@import "./sidebar.css";
+@import "./CustomAlertMessage.css";

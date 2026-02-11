@@ -4,27 +4,48 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Product extends Model
 {
-    use HasFactory, Notifiable;
-    protected $table = 'tbl_products';
-    protected $primaryKey = 'product_id';
-    public $timestamps = true;
+    use HasFactory;
 
-    protected $fillable = [
-        'product_name',
-        'description',
-        'price',
-        'stock',
-        'image',
-        'category_id'
-    ];
+    protected $fillable = ['name', 'category', 'flavor', 'size', 'price', 'size_prices', 'status', 'image'];
 
-    public function category(): BelongsTo
+    protected $appends = ['image_url'];
+
+    protected function casts(): array
     {
-        return $this->belongsTo(Category::class, 'category_id', 'category_id');
+        return [
+            'price' => 'decimal:2',
+            'size_prices' => 'array',
+        ];
+    }
+
+    public function getImageUrlAttribute(): ?string
+    {
+        if (empty($this->image)) {
+            return null;
+        }
+        $base = request() ? request()->getSchemeAndHttpHost() : config('app.url');
+        return rtrim($base, '/') . '/storage/' . ltrim($this->image, '/');
+    }
+
+    public function addons(): HasMany
+    {
+        return $this->hasMany(ProductAddon::class);
+    }
+
+    public function ingredients(): BelongsToMany
+    {
+        return $this->belongsToMany(Ingredient::class, 'product_ingredients')
+            ->withPivot('quantity')
+            ->withTimestamps();
+    }
+
+    public function productIngredients(): HasMany
+    {
+        return $this->hasMany(ProductIngredient::class);
     }
 }

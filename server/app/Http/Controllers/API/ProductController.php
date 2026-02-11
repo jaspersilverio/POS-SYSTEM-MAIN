@@ -3,80 +3,131 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Product;
+use App\Services\ProductService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
-    public function loadProducts()
+    public function __construct(
+        private ProductService $productService
+    ) {}
+
+    public function index(): JsonResponse
     {
-        $products = Product::with('category')->get();
-        return response()->json([
-            'products' => $products,
-        ], 200);
+        $products = $this->productService->list();
+        return response()->json($products);
     }
 
-    public function storeProduct(Request $request)
+    public function store(Request $request): JsonResponse
     {
-        $validated = $request->validate([
-            'productName' => ['required', 'min: 3', 'max: 100'],
-            'description' => ['nullable', 'max:255'],
-            'price' => ['required', 'numeric', 'min:0'],
-            'stock' => ['required', 'integer', 'min:0'],
-            'categoryId' => ['required', 'exists:tbl_categories,category_id'],
-            'image' => ['nullable', 'image', 'max:2048'],
+        if ($request->has('addons') && is_string($request->input('addons'))) {
+            $request->merge(['addons' => json_decode($request->input('addons'), true) ?? []]);
+        }
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'category' => 'required|in:coffee,non-coffee,frappe,slush',
+            'flavor' => 'required|string|max:255',
+            'sizes' => 'required|array|min:1',
+            'sizes.*.size' => 'required|in:Baby,Giant',
+            'sizes.*.price' => 'required|numeric|min:0',
+            'status' => 'nullable|in:active,inactive',
+            'addons' => 'nullable|array',
+            'addons.*.name' => 'required_with:addons|string|max:255',
+            'addons.*.price' => 'required_with:addons|numeric|min:0',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
 
-        $product = Product::create([
-            'product_name' => $validated['productName'],
-            'description' => $validated['description'],
-            'price' => $validated['price'],
-            'stock' => $validated['stock'],
-            'category_id' => $validated['categoryId'],
-            'image' => $request->hasFile('image') ? $request->file('image')->store('products', 'public') : null,
-        ]);
+        $sizePrices = [];
+        foreach ($request->input('sizes') as $row) {
+            $sizePrices[$row['size']] = (float) $row['price'];
+        }
+        $data = $request->only('name', 'category', 'flavor', 'status', 'addons');
+        $data['size_prices'] = $sizePrices;
+        $data['size'] = array_key_first($sizePrices) ?? 'Baby';
+        $data['price'] = $sizePrices['Baby'] ?? $sizePrices['Giant'] ?? 0;
+        $data['status'] = $data['status'] ?? 'active';
+        if ($request->hasFile('image')) {
+            $data['image'] = $request->file('image')->store('products', 'public');
+        }
+        if (!empty($data['addons'])) {
+            foreach ($data['addons'] as $i => &$addon) {
+                $addon['image'] = null;
+                if ($request->hasFile('addon_image_' . $i)) {
+                    $file = $request->file('addon_image_' . $i);
+                    if ($file->isValid()) {
+                        $addon['image'] = $file->store('addons', 'public');
+                    }
+                }
+            }
+        }
 
-        return response()->json([
-            'message' => 'Product created successfully',
-            'product' => $product,
-        ], 200);
+        $product = $this->productService->store($data);
+        return response()->json($product, 201);
     }
 
-    public function updateProduct(Request $request, $id)
+    public function update(Request $request, int $id): JsonResponse
     {
-        $validated = $request->validate([
-            'productName' => ['required', 'min: 3', 'max: 100'],
-            'description' => ['nullable', 'max:255'],
-            'price' => ['required', 'numeric', 'min:0'],
-            'stock' => ['required', 'integer', 'min:0'],
-            'categoryId' => ['required', 'exists:tbl_categories,category_id'],
-            'image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,svg', 'max:2048'],
+        if ($request->has('addons') && is_string($request->input('addons'))) {
+            $request->merge(['addons' => json_decode($request->input('addons'), true) ?? []]);
+        }
+        $request->validate([
+            'name' => 'sometimes|string|max:255',
+            'category' => 'sometimes|in:coffee,non-coffee,frappe,slush',
+            'flavor' => 'sometimes|string|max:255',
+            'sizes' => 'sometimes|array|min:1',
+            'sizes.*.size' => 'required_with:sizes|in:Baby,Giant',
+            'sizes.*.price' => 'required_with:sizes|numeric|min:0',
+            'status' => 'sometimes|in:active,inactive',
+            'addons' => 'nullable|array',
+            'addons.*.name' => 'required_with:addons|string|max:255',
+            'addons.*.price' => 'required_with:addons|numeric|min:0',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
 
-        $product = Product::findOrFail($id);
-
-        $product->update([
-            'product_name' => $validated['productName'],
-            'description' => $validated['description'],
-            'price' => $validated['price'],
-            'stock' => $validated['stock'],
-            'category_id' => $validated['categoryId'],
-            'image' => $request->hasFile('image') ? $request->file('image')->store('products', 'public') : $product->image,
-        ]);
-
-        return response()->json([
-            'message' => 'Product updated successfully',
-            'product' => $product,
-        ], 200);
+        $data = $request->only('name', 'category', 'flavor', 'status', 'addons');
+        if ($request->has('sizes')) {
+            $sizePrices = [];
+            foreach ($request->input('sizes') as $row) {
+                $sizePrices[$row['size']] = (float) $row['price'];
+            }
+            $data['size_prices'] = $sizePrices;
+            $data['size'] = array_key_first($sizePrices) ?? 'Baby';
+            $data['price'] = $sizePrices['Baby'] ?? $sizePrices['Giant'] ?? 0;
+        }
+        if ($request->hasFile('image')) {
+            $data['image'] = $request->file('image')->store('products', 'public');
+        }
+        if (!empty($data['addons'])) {
+            foreach ($data['addons'] as $i => &$addon) {
+                $addon['image'] = $addon['image'] ?? null;
+                if ($request->hasFile('addon_image_' . $i)) {
+                    $file = $request->file('addon_image_' . $i);
+                    if ($file->isValid()) {
+                        $addon['image'] = $file->store('addons', 'public');
+                    }
+                }
+            }
+        }
+        $product = $this->productService->update($id, $data);
+        return response()->json($product);
     }
 
-    public function deleteProduct($id)
+    public function ingredients(int $id): JsonResponse
     {
-        $product = Product::findOrFail($id);
-        $product->delete();
+        $product = $this->productService->getRecipe($id);
+        return response()->json($product->productIngredients->load('ingredient'));
+    }
 
-        return response()->json([
-            'message' => 'Product deleted successfully',
-        ], 200);
+    public function storeIngredients(Request $request, int $id): JsonResponse
+    {
+        $request->validate([
+            'ingredients' => 'required|array|min:1',
+            'ingredients.*.ingredient_id' => 'required|exists:ingredients,id',
+            'ingredients.*.quantity' => 'required|numeric|min:0',
+        ]);
+
+        $product = $this->productService->setRecipe($id, $request->input('ingredients'));
+        return response()->json($product->productIngredients->load('ingredient'), 201);
     }
 }

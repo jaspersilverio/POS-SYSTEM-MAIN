@@ -1,50 +1,38 @@
 export interface User {
-  user_id: number;
-  first_name: string;
-  middle_name: string;
-  last_name: string;
-  suffix_name: string;
-  age: number;
-  gender: string;
-  contact: string;
-  email: string;
-  password: string;
-  role_id: number;
-  created_at: string;
-  updated_at: string;
-  profile_picture: string | null;
-  role?: {
-    role_id: number;
-    role_name: string;
-  };
+  id: number;
+  name: string;
+  email?: string | null;
+  username: string;
+  role: "admin" | "cashier";
+  status: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface UserForm {
-  first_name: string;
-  middle_name: string;
-  last_name: string;
-  suffix_name: string;
-  age: number;
-  gender: string;
-  contact: string;
-  email: string;
+  name: string;
+  email?: string;
+  username: string;
   password: string;
-  role_id: number;
+  role: "admin" | "cashier";
+  status?: string;
 }
 
 export interface AddUserModalProps {
-  onUserAdded: (message: string) => void;
+  show: boolean;
+  onClose: () => void;
+  onSave: () => void;
 }
 
 export interface UserTableProps {
   refreshUsers: boolean;
   onUserDeleted: (message: string) => void;
+  onAddUser: () => void;
 }
 
 export interface EditUserModalProps {
   show: boolean;
-  onHide: () => void;
-  user: User;
-  onUserUpdated: () => void;
+  onClose: () => void;
+  user: User | null;
+  onSave: () => void;
 }
-  

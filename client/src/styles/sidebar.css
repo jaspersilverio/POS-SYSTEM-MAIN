@@ -1,0 +1,64 @@
+/* Sidebar: aligned with barangay-management-system (fixed dark slate + blue accent) */
+.sidebar {
+  width: 240px;
+  min-width: 240px;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background-color: #1E293B !important;
+  border-right: 1px solid #334155 !important;
+  color: #F1F5F9 !important;
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+}
+
+.sidebar h2 {
+  font-weight: 700;
+  color: #F1F5F9;
+}
+
+.sidebar .nav-link {
+  color: #F1F5F9;
+  padding: 0.625rem 1rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+  font-weight: 500;
+  font-size: 0.9375rem;
+}
+
+.sidebar .nav-link:hover {
+  background-color: #334155 !important;
+  color: #F1F5F9;
+}
+
+.sidebar .nav-link.active {
+  background-color: rgba(59, 130, 246, 0.2) !important;
+  color: #93C5FD;
+}
+
+.sidebar img.logo {
+  width: 85px;
+  height: 60px;
+  object-fit: contain;
+  margin-bottom: 1rem;
+  align-self: start;
+}
+
+.sidebar img.logo2 {
+  position: absolute;
+  top: -25px;
+  left: 90px;
+  width: 150px;
+  z-index: 0;
+}
+
+.sidebar .text-muted {
+  color: #94A3B8 !important;
+}
+
+.sidebar .btn-outline-light:hover {
+  background-color: #334155 !important;
+  border-color: #475569 !important;
+  color: #F1F5F9 !important;
+}

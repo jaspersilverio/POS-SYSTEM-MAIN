@@ -6,41 +6,21 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
-        Schema::create('tbl_users', function (Blueprint $table) {
-            $table->id('user_id');
-            $table->string('profile_image')->nullable();
-            $table->string('first_name', 55);
-            $table->string('middle_name', 55)->nullable();
-            $table->string('last_name', 55);
-            $table->string('suffix_name', 55)->nullable();
-            $table->string('age');
-            $table->enum('gender', ['female', 'male', 'others']);
-            $table->string('contact', 55);
-            $table->string('address', 255);
-            $table->unsignedBigInteger('role_id');
-            $table->string('email', 55)->unique();
-            $table->string('password', 255);
+        Schema::create('users', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->string('username')->unique();
+            $table->string('password');
+            $table->enum('role', ['admin', 'cashier']);
+            $table->enum('status', ['active', 'inactive'])->default('active');
             $table->timestamps();
-
-
-            $table->foreign('role_id')
-                ->references('role_id')
-                ->on('tbl_roles')
-                ->onUpdate('cascade')
-                ->onDelete('cascade');
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::dropIfExists('tbl_users_');
+        Schema::dropIfExists('users');
     }
 };

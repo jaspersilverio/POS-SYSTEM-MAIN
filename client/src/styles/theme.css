@@ -1,0 +1,120 @@
+/**
+ * Theme: aligned with barangay-management-system
+ * https://github.com/jaspersilverio/barangay-management-system
+ * Dark mode palette, Inter font, blue primary, soft shadows.
+ */
+
+:root {
+  /* Dark theme (default for this app) */
+  --color-primary: #3B82F6;
+  --color-primary-dark: #2563EB;
+  --color-accent: #10B981;
+  --color-background: #0F172A;
+  --color-surface: #1E293B;
+  --color-text-primary: #F1F5F9;
+  --color-text-muted: #94A3B8;
+  --color-danger: #EF4444;
+  --color-warning: #F59E0B;
+  --color-border: #334155;
+  --color-border-light: #475569;
+}
+
+body {
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: var(--color-background);
+  color: var(--color-text-primary);
+}
+
+/* Bootstrap overrides using theme variables */
+.form-control,
+.form-select {
+  background-color: var(--color-surface) !important;
+  border-color: var(--color-border) !important;
+  color: var(--color-text-primary) !important;
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--color-primary) !important;
+  box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25) !important;
+}
+
+.modal-content {
+  background-color: var(--color-surface) !important;
+  border-color: var(--color-border) !important;
+  color: var(--color-text-primary) !important;
+}
+
+.modal-header,
+.modal-footer {
+  border-color: var(--color-border) !important;
+  background-color: var(--color-surface) !important;
+}
+
+.text-muted {
+  color: var(--color-text-muted) !important;
+}
+
+.btn-primary {
+  background-color: var(--color-primary) !important;
+  border-color: var(--color-primary) !important;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+}
+
+.btn-primary:hover {
+  background-color: var(--color-primary-dark) !important;
+  border-color: var(--color-primary-dark) !important;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  transform: translateY(-1px);
+}
+
+.card {
+  background-color: var(--color-surface) !important;
+  border-color: var(--color-border) !important;
+  color: var(--color-text-primary) !important;
+}
+
+.card-header,
+.card-body,
+.card-footer {
+  background-color: var(--color-surface) !important;
+  border-color: var(--color-border) !important;
+  color: var(--color-text-primary) !important;
+}
+
+.alert {
+  background-color: var(--color-surface) !important;
+  border-color: var(--color-border) !important;
+  color: var(--color-text-primary) !important;
+}
+
+.table {
+  --bs-table-bg: var(--color-surface) !important;
+  --bs-table-color: var(--color-text-primary) !important;
+  --bs-table-border-color: var(--color-border) !important;
+  --bs-table-striped-bg: var(--color-border-light) !important;
+  --bs-table-hover-bg: var(--color-border-light) !important;
+  color: var(--color-text-primary) !important;
+}
+
+.table > :not(caption) > * > * {
+  background-color: var(--color-surface) !important;
+  color: var(--color-text-primary) !important;
+  border-color: var(--color-border) !important;
+}
+
+.table thead th {
+  background-color: var(--color-border-light) !important;
+  color: var(--color-text-primary) !important;
+  border-color: var(--color-border) !important;
+}
+
+.table tbody tr:hover td {
+  background-color: var(--color-border-light) !important;
+}
+
+/* Login page: use theme background so it matches app */
+.login-wrap {
+  background-color: var(--color-background) !important;
+  color: var(--color-text-primary);
+}

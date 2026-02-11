@@ -2,39 +2,31 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable;
-    protected $table = 'tbl_users';
-    protected $primaryKey = 'user_id';
-    protected $fillable = [
-        'profile_picture',
-        'first_name',
-        'middle_name',
-        'last_name',
-        'suffix_name',
-        'age',
-        'gender',
-        'contact',
-        'address',
-        'role_id',
-        'email',
-        'password',
+    use HasApiTokens, HasFactory;
 
-    ];
+    protected $fillable = ['name', 'email', 'username', 'password', 'role', 'status'];
 
-    protected $hidden = [
-        'password',
-    ];
+    protected $hidden = ['password'];
 
-    public function role(): BelongsTo
+    protected function casts(): array
     {
-        return $this->belongsTo(Role::class, 'role_id', 'role_id');
+        return ['password' => 'hashed'];
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
+    }
+
+    public function orders(): HasMany
+    {
+        return $this->hasMany(Order::class, 'cashier_id');
     }
 }

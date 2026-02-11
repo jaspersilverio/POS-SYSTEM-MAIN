@@ -1,29 +1,36 @@
-import Sidebar from "./components/Sidebar";
-import Home from "./components/pages/Home";
-import Dashboard from "./components/pages/Dashboard";
-import Products from "./components/pages/Products";
-import Categories from "./components/pages/Categories";
-import Users from "./components/pages/Users";
-import Roles from "./components/pages/role/Roles";
-import { Route, Routes } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import Sidebar from "./components/common/Sidebar";
+import { AppRoutes } from "./routes/AppRoutes";
+import { useIdleTimeout } from "./hooks/useIdleTimeout";
+import "./styles/globals.css";
 
 function App() {
+  const token = localStorage.getItem("token");
+  const navigate = useNavigate();
+
+  const handleIdle = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    navigate("/login", { replace: true });
+    window.location.reload();
+  };
+
+  if (!token) {
+    return <AppRoutes />;
+  }
+
+  return <AuthenticatedLayout onIdle={handleIdle} />;
+}
+
+function AuthenticatedLayout({ onIdle }: { onIdle: () => void }) {
+  useIdleTimeout(onIdle);
   return (
-    <>
-      <div className="d-flex bg-dark text-white">
-        <Sidebar />
-        <div className="flex-grow-1 p-4 " style={{ minHeight: "100vh" }}>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/roles" element={<Roles />} />
-            <Route path="/users" element={<Users />} />
-            <Route path="/categories" element={<Categories />} />
-            <Route path="/products" element={<Products />} />
-          </Routes>
-        </div>
+    <div className="d-flex">
+      <Sidebar />
+      <div className="flex-grow-1 p-4 app-main">
+        <AppRoutes />
       </div>
-    </>
+    </div>
   );
 }
 
